@@ -35,7 +35,7 @@ def clean_unit_name(unit: str) -> str | None:
     return unit
 
 
-def search_usda(food_name, max_results=20):
+def search_usda(food_name, max_results=50):
     params = {"query": food_name, "pageSize": max_results * 2, "api_key": USDA_KEY}
     r = requests.get(USDA_SEARCH_URL, params=params)
     data = r.json()
@@ -100,7 +100,7 @@ st.title("🍽️ Calorie Converter (USDA + Nutritionix)")
 st.write("Enter a food, pick the best match, and get equivalent weights/units for your target calories.")
 
 food_name = st.text_input("Enter a food name:")
-target_cal = st.number_input("Target calories:", min_value=10, max_value=1000, value=100, step=10)
+target_cal = st.number_input("Target calories:", min_value=1, max_value=2000, value=100, step=1)
 
 if food_name:
     matches = search_usda(food_name)
@@ -108,10 +108,9 @@ if food_name:
         st.error(f"No USDA results for '{food_name}'")
     else:
         options = [f["description"].title() for f in matches]
-        selected_desc = st.selectbox("Choose the correct item:", options)
-        food = next(f for f in matches if f["description"].title() == selected_desc)
-
-        if st.button("Convert"):
+        selected_desc = st.selectbox("Choose the correct item:", options=options, index=None, placeholder="Scroll to select a food")
+       if selected_desc and st.button("Convert"):
+            food = next(f for f in matches if f["description"].title() == selected_desc)
             usda_result, error = get_usda_calories(food, target_cal)
             if error:
                 st.error(error)
