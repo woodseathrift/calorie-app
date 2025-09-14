@@ -108,25 +108,31 @@ if food_name:
         st.error(f"No USDA results for '{food_name}'")
     else:
         options = [f["description"].title() for f in matches]
-        selected_desc = st.selectbox("Choose the correct item:", options=options, index=None, placeholder="Scroll to select a food")
-       if selected_desc and st.button("Convert"):
-            food = next(f for f in matches if f["description"].title() == selected_desc)
-            usda_result, error = get_usda_calories(food, target_cal)
-            if error:
-                st.error(error)
-            else:
-                grams_needed = usda_result["grams"]
-                equivalents = get_nutritionix_equivalents(food_name, grams_needed)
 
-                st.subheader(f"{usda_result['food']} equivalents for {target_cal:.0f} cal:")
+selected_desc = st.selectbox(
+    "Choose the correct item:",
+    options=options,
+    index=None,
+    placeholder="Scroll to select a food"
+)
 
-                order = ["g", "oz", "cup", "tbsp", "tsp"]
-                shown = set()
-                for unit in order:
-                    if unit in equivalents:
-                        st.write(f"- {equivalents[unit]:.2f} {unit}")
-                        shown.add(unit)
-                for unit, amt in equivalents.items():
-                    if unit not in shown:
-                        st.write(f"- {amt:.2f} {unit}")
+if selected_desc and st.button("Convert"):
+    food = next(f for f in matches if f["description"].title() == selected_desc)
+    usda_result, error = get_usda_calories(food, target_cal)
+    if error:
+        st.error(error)
+    else:
+        grams_needed = usda_result["grams"]
+        equivalents = get_nutritionix_equivalents(food_name, grams_needed)
 
+        st.subheader(f"{usda_result['food']} equivalents for {target_cal:.0f} cal:")
+
+        order = ["g", "oz", "cup", "tbsp", "tsp"]
+        shown = set()
+        for unit in order:
+            if unit in equivalents:
+                st.write(f"- {equivalents[unit]:.2f} {unit}")
+                shown.add(unit)
+        for unit, amt in equivalents.items():
+            if unit not in shown:
+                st.write(f"- {amt:.2f} {unit}")
